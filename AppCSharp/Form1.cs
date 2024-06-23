@@ -16,7 +16,10 @@ namespace AppCSharp
     {
         private int x = 12, y = 12;
         private Button[,] buttons  =new Button[3,3];
-        private int player;
+        private int player = 0; // 0 - игрок 1 (X), 1 - игрок 2 (O)
+
+        private bool gameOver = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -35,7 +38,7 @@ namespace AppCSharp
             setButtons();         
            
         }
-
+        
         private void setButtons()
         {
             for (int i = 0; i < 3; i++)
@@ -53,86 +56,109 @@ namespace AppCSharp
 
         private void button1_Click(object sender, EventArgs e)
         {
-            switch (player)
+            if (!gameOver)
             {
-                case 1:
-                    sender.GetType().GetProperty("Text").SetValue(sender, "x");                    
-                    player = 0;
-                    label1.Text = "Делает шаг: Игрок 2";
-                    break;
-                case 0:
-                    sender.GetType().GetProperty("Text").SetValue(sender, "o");
-                    player = 1;
-                    label1.Text = "Делает шаг: Игрок 1";
-                    break;
-            }
-            sender.GetType().GetProperty("Enabled").SetValue(sender, false);
-            checkWin();
-        }
-        private void checkWin()
-        {
-           
-            if(buttons[0,0].Text==buttons[0,1].Text && buttons[0,1].Text == buttons[0, 2].Text)
-            {
-                
-                if (buttons[0, 0].Text != "")
+                Button clickedButton = (Button)sender;
+                if (clickedButton.Text == "")
                 {
-                    MessageBox.Show("Вы Monster!");
-                    return;
+                    clickedButton.Text = (player == 0) ? "X" : "O";
+                    CheckWin();
+                    player = (player == 0) ? 1 : 0; // Переключение игрока
+                    label1.Text = $"Делает шаг: Игрок {player + 1}";
                 }
-            }
-            if (buttons[1,0].Text == buttons[1, 1].Text && buttons[1, 1].Text == buttons[1, 2].Text)
-            {
-                if (buttons[1, 0].Text != "")
-                    MessageBox.Show("Вы Monster!");
-            }
-            if (buttons[2, 0].Text == buttons[2, 1].Text && buttons[2, 1].Text == buttons[2, 2].Text)
-            {
-                if (buttons[2, 0].Text != "")
-                    MessageBox.Show("Вы Monster!");
-            }
-            if (buttons[0, 0].Text == buttons[1, 0].Text && buttons[1, 0].Text == buttons[2, 0].Text)
-            {
-                if (buttons[0, 0].Text != "")
-                    MessageBox.Show("Вы Monster!");
-            }
-            if (buttons[0, 1].Text == buttons[1, 1].Text && buttons[1, 1].Text == buttons[2, 1].Text)
-            {
-                if (buttons[0, 1].Text != "")
-                    MessageBox.Show("Вы Monster!");
-            }
-            if (buttons[0, 2].Text == buttons[1, 2].Text && buttons[1, 2].Text == buttons[2, 2].Text)
-            {
-                if (buttons[0, 2].Text != "")
-                    MessageBox.Show("Вы Monster!");
-            }
-            if (buttons[0, 0].Text == buttons[1, 1].Text && buttons[1, 1].Text == buttons[2, 2].Text)
-            {
-                if (buttons[0, 0].Text != "")
-                    MessageBox.Show("Вы Monster!");
-            }
-            if (buttons[2, 0].Text == buttons[1, 1].Text && buttons[1, 1].Text == buttons[0, 2].Text)
-            {
-                if (buttons[2, 0].Text != "")
-                    MessageBox.Show("Вы Monster!");
             }
         }
 
+        private void CheckWin()
+        {
+            string winner = "";
+
+         
+            for (int row = 0; row < 3; row++)
+            {
+                if (buttons[row, 0].Text == buttons[row, 1].Text && buttons[row, 1].Text == buttons[row, 2].Text)
+                {
+                    if (!string.IsNullOrEmpty(buttons[row, 0].Text))
+                    {
+                        winner = buttons[row, 0].Text; 
+                        break;
+                    }
+                }
+            }
+
+            
+            for (int col = 0; col < 3; col++)
+            {
+                if (buttons[0, col].Text == buttons[1, col].Text && buttons[1, col].Text == buttons[2, col].Text)
+                {
+                    if (!string.IsNullOrEmpty(buttons[0, col].Text))
+                    {
+                        winner = buttons[0, col].Text;
+                        break;
+                    }
+                }
+            }
+
+            if (buttons[0, 0].Text == buttons[1, 1].Text && buttons[1, 1].Text == buttons[2, 2].Text)
+            {
+                if (!string.IsNullOrEmpty(buttons[0, 0].Text))
+                {
+                    winner = buttons[0, 0].Text;
+                }
+            }
+            else if (buttons[2, 0].Text == buttons[1, 1].Text && buttons[1, 1].Text == buttons[0, 2].Text)
+            {
+                if (!string.IsNullOrEmpty(buttons[2, 0].Text))
+                {
+                    winner = buttons[2, 0].Text; 
+                }
+            }
+
+            bool isDraw = true;
+            foreach (var button in buttons)
+            {
+                if (string.IsNullOrEmpty(button.Text))
+                {
+                    isDraw = false;
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(winner))
+            {
+                MessageBox.Show($"Победитель: {winner}!");
+                gameOver = true;
+                
+            }
+            else if (isDraw)
+            {
+                MessageBox.Show("Ничья! Игра завершена.");
+                gameOver = true;
+              
+            }
+        }
+
+
         private void button1_Click_1(object sender, EventArgs e)
         {
-            new Form2().ShowDialog();
+            Form2 form2 = new Form2();
+            this.Visible = false;
+            form2.ShowDialog();
+            this.Close();
+
         }
 
         private void buttonPlay_Click(object sender, EventArgs e)
         {
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
-                for(int j = 0; j < 3; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     buttons[i, j].Text = "";
                     buttons[i, j].Enabled = true;
                 }
             }
         }
+        
     }
 }
